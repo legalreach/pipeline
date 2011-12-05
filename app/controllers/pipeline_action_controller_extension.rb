@@ -16,7 +16,7 @@ module PipelineActionControllerExtension
 			onload = yield rendered_view
 
 			render :json => {
-			  :onload => onload.gsub(/[\n]+/, "").gsub(/[\t]+/,"")
+			  :onload => onload.gsub(/[\n]+/, " ").gsub(/[\t]+/," ").gsub(/[\r]+/, " ")
 			}
 		end
 	end
