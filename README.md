@@ -59,6 +59,10 @@ The best way to install Pipeline is via Gemfile:
 
     gem "pipeline", :git => 'git://github.com/legalreach/pipeline.git'
 
+Then require the pipeline javascsript by adding the following line to application.js:
+   
+    //= require 'pipeline'
+
 ## COMPANIES ALREADY USING THIS
 
 LegalReach, MyDressAffair
