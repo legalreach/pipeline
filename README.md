@@ -2,16 +2,56 @@ Pipeline - Eliminate boiler-plate code for AJAX interactions
 ============================================================
 
 ## DESCRIPTION
-As web developers, we are always writing the same boilerplate javascript code to wire very similar AJAX interactions. This is unnecessary and there is a better way.
 
-90% of AJAX interactions can be boiled to a very small set of steps:
+Pipeline enables you to replace sub-elments of a named html-element with new html. Pipeline achieves this via AJAX.
 
-1. User clicks on a link or submits a form, 
-2. an AJAX request is sent to the server, 
-3. some markup is put into the DOM.
+Our approach consists of three steps:
+  * Prerequisite: A view is rendered already in the user's browser.
 
-By framing AJAX interactions into the steps above, we can now perform majority of the Ajax interactions with very little effort, with Pipeline.
+  1. the user or an automated action trigger an asyncronous AJAX request to a controller action.
+  2. the controller action renders a partial view and returns it as JSON.
+  3. client-side AJAX code replaces all sub-elements of the named html element with the rendered view from #2.
 
+Pipeline makes it easy to perform these steps.
+
+## EXAMPLE USE
+
+Two steps are necessary to update a page with Pipeline:
+
+* Create an action that renders an partial update to a page. 
+	
+	* When processing the server request, the controller action will inject markup (or any JS code) that will automaticaly be executed at the client. The rails code to perform this is:
+           
+           ```
+           class TestAsync < ApplicationController
+             def asyncAction
+               ...               
+               //Initialize variables to render view here
+               ...
+               render_for_pipeline("some_view_to_be_rendered", "", "") { |rendered_view| 
+                 <<-eos
+                    $(this.relativeTo).parents(".replaceME").html(rendered_view); 
+                    // injects/replaces html markup on the browser 
+                 eos
+               } 
+             end
+           end
+           ```
+
+
+* Insert a 'rel=async' attribute into your html to trigger an asyncronous page update (e.g on a link or form submit).
+
+	*  Add a "rel=async" attribute to wire a click or form submission to happen asynchronously. For example,
+		
+		```
+                <div class="replaceME"">
+                  <a href="/asyncAction" rel="async">Click Me, I'm Async</a> 
+                  <form action="/some_url" method="post" rel="async"></form>
+                </div>
+		```
+
+When the triggers the asyncronous call, by for instance clicking a link with a 'rel="async"' attribute, Pipeline will automatically replace sub-elements of a named
+html element (e.g. '.replaceME') with the view rendered by 'asyncAction'.
 
 ## INSTALLATION
 
@@ -19,34 +59,9 @@ The best way to install Pipeline is via Gemfile:
 
     gem "pipeline", :git => 'git://github.com/legalreach/pipeline.git'
 
-## USING
-
-Let's see how Pipeline solves for the 3 steps:
-
-1. User clicks on a link or submits a form
-
-	* To wire a click or form submission to happen asynchronously, all we need to do is add a "rel=async" attribute. For example,
-		
-		```
-		<a href="/some_url" rel="async">Click Me, I'm Async</a>
-		<form action="/some_url" method="post" rel="async"></form>
-		```
-
-1. an AJAX request is sent to the server
-
-	* The pipeline code automatically detects an async attribute and opens up an Ajax call to the server using the url in the href or action attribute
-
-3. some markup is put into the DOM.
-	
-	* When processing the server request, the controller action will inject markup (or any JS code) that will automaticaly be executed at the client. The rails code to perform this is,
-	
-		```
-		render_for_pipeline("some_view_to_be_rendered", "", "") { |rendered_view| 
-			<<-eos
-				$(this).html(rendered_view); // injects/replaces html markup on the browser
-			eos
-		}
-		```
+Then require the pipeline javascsript by adding the following line to application.js:
+   
+    //= require 'pipeline'
 
 ## COMPANIES ALREADY USING THIS
 
